@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "ingreso-egresoapp-4315b": {
+      "hosting": {
+        "ingresoEgresoApp": [
+          "ingreso-egresoapp-4315b"
+        ]
+      }
+    }
+  }
+}
