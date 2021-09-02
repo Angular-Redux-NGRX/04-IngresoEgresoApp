@@ -35,7 +35,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.uiSubscription = this.store.select('ui').subscribe(ui => {
       this.cargando = ui.isLoading;
     });
-    this.store.dispatch(ui.stopLoading());
   }
   ngOnDestroy(): void {
     this.uiSubscription.unsubscribe();

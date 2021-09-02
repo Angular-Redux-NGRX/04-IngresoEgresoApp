@@ -14,22 +14,30 @@ import * as uiActions from '../shared/ui.actions';
 })
 export class AuthService {
   firebaseUser!:Subscription;
+  private _user!:Usuario | null;
+
+  get user(){
+    return { ...this._user };
+  }
+
   constructor(public auth: AngularFireAuth,
               public firestore:AngularFirestore,
               private store:Store) { }
 
   initAuthListener(){
     this.auth.authState.subscribe( fuser =>{
-      console.log(fuser);
+      //console.log(fuser);
       if(fuser){
         //existe
         this.firebaseUser = this.firestore.doc(`${fuser.uid}/usuario`).valueChanges()
         .subscribe( (firestoreUser:any) => {
           const user = Usuario.fromFirebase(firestoreUser);
+          this._user = user;
           this.store.dispatch(authActions.setUser({ user }));
         });
       }else{
         //no existe
+        this._user = null;
         this.firebaseUser.unsubscribe();
         this.store.dispatch(authActions.unSetUser());
       }

@@ -3,10 +3,7 @@ import { Usuario } from '../models/usuario.model';
 
 export const setUser = createAction(
   '[Auth] setUser',
-  props<{user:Usuario}>()
+  props<{ user: Usuario }>()
 );
 
-export const unSetUser = createAction(
-  '[Auth] unSetUser',
-);
-
+export const unSetUser = createAction('[Auth] unSetUser');
