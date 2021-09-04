@@ -6,63 +6,68 @@ import { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import * as authActions from '../auth/auth.actions';
 import { Usuario } from '../models/usuario.model';
-import * as uiActions from '../shared/ui.actions';
-
+import * as ingresoEgresoActions from '../ingreso-egreso/ingreso-egreso.actions';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-  firebaseUser!:Subscription;
-  private _user!:Usuario | null;
+  firebaseUser!: Subscription;
+  private _user!: Usuario | null;
 
-  get user(){
+  get user() {
     return { ...this._user };
   }
 
-  constructor(public auth: AngularFireAuth,
-              public firestore:AngularFirestore,
-              private store:Store) { }
+  constructor(
+    public auth: AngularFireAuth,
+    public firestore: AngularFirestore,
+    private store: Store
+  ) {}
 
-  initAuthListener(){
-    this.auth.authState.subscribe( fuser =>{
+  initAuthListener() {
+    this.auth.authState.subscribe((fuser) => {
       //console.log(fuser);
-      if(fuser){
+      if (fuser) {
         //existe
-        this.firebaseUser = this.firestore.doc(`${fuser.uid}/usuario`).valueChanges()
-        .subscribe( (firestoreUser:any) => {
-          const user = Usuario.fromFirebase(firestoreUser);
-          this._user = user;
-          this.store.dispatch(authActions.setUser({ user }));
-        });
-      }else{
+        this.firebaseUser = this.firestore
+          .doc(`${fuser.uid}/usuario`)
+          .valueChanges()
+          .subscribe((firestoreUser: any) => {
+            const user = Usuario.fromFirebase(firestoreUser);
+            this._user = user;
+            this.store.dispatch(authActions.setUser({ user }));
+          });
+      } else {
         //no existe
         this._user = null;
         this.firebaseUser.unsubscribe();
         this.store.dispatch(authActions.unSetUser());
+        this.store.dispatch(ingresoEgresoActions.unsetItems());
       }
     });
   }
 
-  crearUsuario(nombre:string,email:string,password:string){
-    return this.auth.createUserWithEmailAndPassword(email,password)
-    .then( ( fuser ) => {
-      const newUser = new Usuario( fuser.user!.uid, nombre, email );
-      return this.firestore.doc(`${fuser.user?.uid}/usuario`).set( Object.assign({}, newUser) );
-    });
+  crearUsuario(nombre: string, email: string, password: string) {
+    return this.auth
+      .createUserWithEmailAndPassword(email, password)
+      .then((fuser) => {
+        const newUser = new Usuario(fuser.user!.uid, nombre, email);
+        return this.firestore
+          .doc(`${fuser.user?.uid}/usuario`)
+          .set(Object.assign({}, newUser));
+      });
   }
 
-  loginUsuario(email:string,password:string){
-    return this.auth.signInWithEmailAndPassword(email,password);
+  loginUsuario(email: string, password: string) {
+    return this.auth.signInWithEmailAndPassword(email, password);
   }
 
-  logout(){
+  logout() {
     return this.auth.signOut();
   }
 
-  isAuth(){
-    return this.auth.authState.pipe(
-      map( fuser => fuser != null )
-    );
+  isAuth() {
+    return this.auth.authState.pipe(map((fuser) => fuser != null));
   }
 }

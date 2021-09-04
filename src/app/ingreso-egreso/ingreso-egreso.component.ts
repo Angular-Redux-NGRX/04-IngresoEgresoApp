@@ -11,18 +11,18 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-ingreso-egreso',
   templateUrl: './ingreso-egreso.component.html',
-  styles: [
-  ]
+  styles: [],
 })
-export class IngresoEgresoComponent implements OnInit, OnDestroy{
-
+export class IngresoEgresoComponent implements OnInit, OnDestroy {
   ingresoForm!: FormGroup;
-  tipo:string='ingreso';
+  tipo: string = 'ingreso';
   cargando = false;
-  uiSubscription!:Subscription;
-  constructor(private fb: FormBuilder,
-              private ingresoEgresoService: IngresoEgresoService,
-              private store:Store<AppState>) { }
+  uiSubscription!: Subscription;
+  constructor(
+    private fb: FormBuilder,
+    private ingresoEgresoService: IngresoEgresoService,
+    private store: Store<AppState>
+  ) {}
 
   ngOnDestroy(): void {
     this.uiSubscription.unsubscribe();
@@ -30,43 +30,39 @@ export class IngresoEgresoComponent implements OnInit, OnDestroy{
 
   ngOnInit(): void {
     this.ingresoForm = this.fb.group({
-      descripcion:['',[Validators.required]],
-      monto:['',[Validators.required]],
+      descripcion: ['', [Validators.required]],
+      monto: ['', [Validators.required]],
     });
 
-    this.uiSubscription = this.store.select('ui').subscribe( ui =>{
+    this.uiSubscription = this.store.select('ui').subscribe((ui) => {
       this.cargando = ui.isLoading;
     });
   }
 
-  guardar(){
-    this.store.dispatch( ui.isLoading());
-    setTimeout(() => {
-      // cancelar loading
-      this.store.dispatch( ui.stopLoading());
-    }, 2500);
-    return;
-    console.log(this.ingresoForm.value);
-    console.log(this.tipo);
+  guardar() {
+    this.store.dispatch(ui.isLoading());
     const { descripcion, monto } = this.ingresoForm.value;
-    const ingresoEgreso = new IngresoEgreso( descripcion, monto, this.tipo);
-    this.ingresoEgresoService.crearIngresoEgreso(ingresoEgreso)
-    .then(() => {
-      Swal.fire({
-        position: 'center',
-        icon: 'success',
-        title: 'Creado correctamente',
-        showConfirmButton: false,
-        timer: 1500
-      });
-      this.ingresoForm.reset();
-    }).catch( (error)=> {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error.message,
+    const ingresoEgreso = new IngresoEgreso(descripcion, monto, this.tipo);
+    console.log(ingresoEgreso);
+    this.ingresoEgresoService
+      .crearIngresoEgreso(ingresoEgreso)
+      .then(() => {
+        Swal.fire({
+          position: 'center',
+          icon: 'success',
+          title: 'Creado correctamente',
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        this.ingresoForm.reset();
       })
-    } );
+      .catch((error) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message,
+        });
+      });
+      this.store.dispatch(ui.stopLoading());
   }
-
 }
