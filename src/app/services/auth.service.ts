@@ -41,7 +41,7 @@ export class AuthService {
       } else {
         //no existe
         this._user = null;
-        this.firebaseUser.unsubscribe();
+        this.firebaseUser?.unsubscribe();
         this.store.dispatch(authActions.unSetUser());
         this.store.dispatch(ingresoEgresoActions.unsetItems());
       }
